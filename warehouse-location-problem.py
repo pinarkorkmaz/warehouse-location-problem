@@ -2,16 +2,16 @@ from ortools.linear_solver import pywraplp
 
 # Product and area information
 products = [
-    {"id": "P1", "width": 10, "height": 20, "depth": 30, "priority": 5, "quantity": 500},
-    {"id": "P2", "width": 11, "height": 22, "depth": 40, "priority": 1, "quantity": 800},
-    {"id": "P3", "width": 13, "height": 23, "depth": 50, "priority": 3, "quantity": 700},
-    {"id": "P4", "width": 11, "height": 44, "depth": 60, "priority": 6, "quantity": 600},
-    {"id": "P5", "width": 32, "height": 33, "depth": 70, "priority": 4, "quantity": 900},
-    {"id": "P6", "width": 23, "height": 34, "depth": 80, "priority": 8, "quantity": 750},
-    {"id": "P7", "width": 90, "height": 89, "depth": 90, "priority": 10, "quantity": 550},
-    {"id": "P8", "width": 19, "height": 23, "depth": 100, "priority": 9, "quantity": 1000},
-    {"id": "P9", "width": 34, "height": 45, "depth": 105, "priority": 7, "quantity": 850},
-    {"id": "P10", "width": 45, "height": 56, "depth": 85, "priority": 2, "quantity": 650},
+    {"id": "P1", "width": 10, "height": 20, "depth": 30, "priority": 5, "quantity": 100},
+    {"id": "P2", "width": 11, "height": 22, "depth": 40, "priority": 1, "quantity": 250},
+    {"id": "P3", "width": 13, "height": 23, "depth": 50, "priority": 3, "quantity": 95},
+    {"id": "P4", "width": 11, "height": 44, "depth": 60, "priority": 6, "quantity": 200},
+    {"id": "P5", "width": 32, "height": 33, "depth": 70, "priority": 4, "quantity": 70},
+    {"id": "P6", "width": 23, "height": 34, "depth": 80, "priority": 8, "quantity": 150},
+    {"id": "P7", "width": 90, "height": 89, "depth": 90, "priority": 10, "quantity": 10},
+    {"id": "P8", "width": 19, "height": 23, "depth": 100, "priority": 9, "quantity": 50},
+    {"id": "P9", "width": 34, "height": 45, "depth": 105, "priority": 7, "quantity": 30},
+    {"id": "P10", "width": 45, "height": 56, "depth": 85, "priority": 2, "quantity": 45},
 ]
 
 # Area information and fixed dimensions
