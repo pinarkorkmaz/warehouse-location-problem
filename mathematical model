@@ -7,29 +7,26 @@ j: areas (1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21
 
 
 Decision Variables
-X𝑖j: the amount of product i to be placed in field 𝑗. (i ürünü j yerine yerleştirilirse 1 yerleştirilmezse 0 olabilir pınar bi araştır istersen)
+X𝑖j: the amount of product i to be placed in field 𝑗. (However, X𝑖j is a binary variable, 𝑖 is placed in area 𝑗 (1 if placed, 0 otherwise))
 
 Parameters
 W𝑖: width of product i
 𝐻𝑖: height of product i
 𝐷𝑖: depth of product i
-𝑉𝑖: volume of product i
+𝑉𝑖: volume of product i (W𝑖*𝐻𝑖*Di)
 𝑄𝑖: quantity of product i
 𝑊𝑗: width of field j
 𝐻𝑗: height of field j
 𝐷𝑗: depth of field j
-𝑈𝑗: volume of area j
+𝑈𝑗: volume of area j (Wj*Hj*Dj)
 P𝑖: priority score of product i
 𝑆𝑗: score of field j
 
+Objective Function
+Maximize ∑𝑖∑𝑗 P𝑖*S𝑗*X𝑖j
 
-Maksimize ∑𝑖∑𝑗 P𝑖*S𝑗
-
-Uj = Wj*Hj*Dj
-𝑉𝑖 = W𝑖*𝐻𝑖*Di
-
+Constraints
 ∑jxij = Qi ∀i #Each product must be placed completely
-∑i Vi*xij≤Uj ∀j #Her alanın toplam hacmi ürünlerin hacminden küçük olmalı
-xij =0if(Wi >Wj ) or (Hi >Hj ) or (Di >Dj ) #eğer binary olursa bence mantık bu olur. yani ürün hacmi > alan olursa mesela 0 olmalı gibi sanki
-
-​
+∑i Vi*xij≤Uj ∀j #Her alandaki toplam ürün hacmi her alanın hacminden küçük olmalı
+xij =0 if(Wi >Wj ) or (Hi >Hj ) or (Di >Dj) ∀ij # yani ürün hacmi > alan hacmi olursa 0 olmalı
+W𝑖,𝐻𝑖,𝐷𝑖,𝑉𝑖,𝑄𝑖,𝑊𝑗,𝐻𝑗,𝐷𝑗,𝑈𝑗,P𝑖,𝑆𝑗,xij≥0 ∀i,∀j #non-negativity
