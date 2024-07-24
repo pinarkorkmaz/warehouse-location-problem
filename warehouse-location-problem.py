@@ -2,16 +2,16 @@ from ortools.linear_solver import pywraplp
 
 # Product and area information
 products = [
-    {"id": "P1", "width": 10, "height": 20, "depth": 30, "priority": 5, "quantity": 100},
-    {"id": "P2", "width": 11, "height": 22, "depth": 40, "priority": 1, "quantity": 250},
-    {"id": "P3", "width": 13, "height": 23, "depth": 50, "priority": 3, "quantity": 95},
-    {"id": "P4", "width": 11, "height": 44, "depth": 60, "priority": 6, "quantity": 200},
-    {"id": "P5", "width": 32, "height": 33, "depth": 70, "priority": 4, "quantity": 70},
-    {"id": "P6", "width": 23, "height": 34, "depth": 80, "priority": 8, "quantity": 150},
-    {"id": "P7", "width": 90, "height": 89, "depth": 90, "priority": 10, "quantity": 10},
-    {"id": "P8", "width": 19, "height": 23, "depth": 100, "priority": 9, "quantity": 50},
-    {"id": "P9", "width": 34, "height": 45, "depth": 105, "priority": 7, "quantity": 30},
-    {"id": "P10", "width": 45, "height": 56, "depth": 85, "priority": 2, "quantity": 45},
+    {"id": "P1", "width": 10, "height": 20, "depth": 30, "priority": 5, "quantity": 100, "weight": 10},
+    {"id": "P2", "width": 11, "height": 22, "depth": 40, "priority": 1, "quantity": 250, "weight": 20},
+    {"id": "P3", "width": 13, "height": 23, "depth": 50, "priority": 3, "quantity": 95, "weight": 15},
+    {"id": "P4", "width": 11, "height": 44, "depth": 60, "priority": 6, "quantity": 200, "weight": 25},
+    {"id": "P5", "width": 32, "height": 33, "depth": 70, "priority": 4, "quantity": 70, "weight": 30},
+    {"id": "P6", "width": 23, "height": 34, "depth": 80, "priority": 8, "quantity": 150, "weight": 35},
+    {"id": "P7", "width": 90, "height": 89, "depth": 90, "priority": 10, "quantity": 10, "weight": 50},
+    {"id": "P8", "width": 19, "height": 23, "depth": 100, "priority": 9, "quantity": 50, "weight": 45},
+    {"id": "P9", "width": 34, "height": 45, "depth": 105, "priority": 7, "quantity": 30, "weight": 40},
+    {"id": "P10", "width": 45, "height": 56, "depth": 85, "priority": 2, "quantity": 45, "weight": 55},
 ]
 
 # Area information and fixed dimensions
@@ -75,30 +75,42 @@ if not solver:
     raise ValueError("Solver not created.")
 
 # Decision variables
-x = {}
+x_lower = {}
+x_upper = {}
 for product in products:
     for area in areas:
-        x[product["id"], area["id"]] = solver.IntVar(0, product["quantity"], f'x[{product["id"]},{area["id"]}]')
+        x_lower[product["id"], area["id"]] = solver.IntVar(0, product["quantity"], f'x_lower[{product["id"]},{area["id"]}]')
+        x_upper[product["id"], area["id"]] = solver.IntVar(0, product["quantity"], f'x_upper[{product["id"]},{area["id"]}]')
 
 # Constraints for each product
 for product in products:
-    solver.Add(solver.Sum([x[product["id"], area["id"]] for area in areas]) == product["quantity"])
+    solver.Add(solver.Sum([x_lower[product["id"], area["id"]] + x_upper[product["id"], area["id"]] for area in areas]) == product["quantity"])
 
 # Constraints for each area
 for area in areas:
-    solver.Add(solver.Sum([product["volume"] * x[product["id"], area["id"]] for product in products]) <= area["volume"])
+    solver.Add(solver.Sum([product["volume"] * x_lower[product["id"], area["id"]] for product in products]) <= area["volume"] / 2)
+    solver.Add(solver.Sum([product["volume"] * x_upper[product["id"], area["id"]] for product in products]) <= area["volume"] / 2)
 
 # Constraints for fitting product dimensions in the area
 for product in products:
     for area in areas:
         if product["width"] > area["width"] or product["height"] > area["height"] or product["depth"] > area["depth"]:
-            solver.Add(x[product["id"], area["id"]] == 0)
+            solver.Add(x_lower[product["id"], area["id"]] == 0)
+            solver.Add(x_upper[product["id"], area["id"]] == 0)
+
+# Constraints for weight
+for area in areas:
+    for product1 in products:
+        for product2 in products:
+            if product1["weight"] > product2["weight"]:
+                solver.Add(x_upper[product1["id"], area["id"]] <= product1["quantity"] * (1 - x_lower[product2["id"], area["id"]]))
 
 # Objective function: Maximize total score
 objective_terms = []
 for product in products:
     for area in areas:
-        objective_terms.append(product["priority"] * area["score"] * x[product["id"], area["id"]])
+        objective_terms.append(product["priority"] * area["score"] * x_lower[product["id"], area["id"]])
+        objective_terms.append(product["priority"] * area["score"] * x_upper[product["id"], area["id"]])
 
 solver.Maximize(solver.Sum(objective_terms))
 
@@ -118,9 +130,12 @@ if status == pywraplp.Solver.OPTIMAL or status == pywraplp.Solver.FEASIBLE:
     print('Total score = ', solver.Objective().Value(), '\n')
     for product in products:
         for area in areas:
-            quantity = x[product["id"], area["id"]].solution_value()
-            if quantity > 0:
-                print(f'Product {product["id"]} placed in Area {area["id"]} with quantity {quantity}.')
+            quantity_lower = x_lower[product["id"], area["id"]].solution_value()
+            quantity_upper = x_upper[product["id"], area["id"]].solution_value()
+            if quantity_lower > 0:
+                print(f'Product {product["id"]} placed in lower part of Area {area["id"]} with quantity {quantity_lower}.')
+            if quantity_upper > 0:
+                print(f'Product {product["id"]} placed in upper part of Area {area["id"]} with quantity {quantity_upper}.')
     print("\nMaximum score:", solver.Objective().Value())
 else:
     print('No solution found.')
