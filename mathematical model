@@ -5,9 +5,9 @@ index
 𝑖: products (1, 2, 3, 4, 5, 6, 7, 8, 10)
 j: areas (1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30)
 
-
 Decision Variables
-X𝑖j: the amount of product i to be placed in field 𝑗. (However, X𝑖j is a binary variable, 𝑖 is placed in area 𝑗 (1 if placed, 0 otherwise))
+X𝑖j^^lower: Quantity of product 𝑖 placed in the lower part of area 𝑗 (Binary variable, 1 if product 𝑖 is placed in area 𝑗, 0 otherwise)
+X𝑖j^^upper: Quantity of product 𝑖 placed in the upper part of area 𝑗 (Binary variable, 1 if product 𝑖 is placed in area 𝑗, 0 otherwise)
 
 Parameters
 W𝑖: width of product i
@@ -21,12 +21,16 @@ W𝑖: width of product i
 𝑈𝑗: volume of area j (Wj*Hj*Dj)
 P𝑖: priority score of product i
 𝑆𝑗: score of field j
+G𝑖: Weight of product 𝑖
 
 Objective Function
-Maximize ∑𝑖∑𝑗 P𝑖*S𝑗*X𝑖j
+Maximize ∑𝑖∑𝑗 (P𝑖*S𝑗*X𝑖j^^lower + P𝑖*S𝑗*X𝑖j^^upper)
 
 Constraints
-∑jxij = Qi ∀i #Each product must be placed completely
-∑i Vi*xij≤Uj ∀j #Her alandaki toplam ürün hacmi her alanın hacminden küçük olmalı
-xij =0 if(Wi >Wj ) or (Hi >Hj ) or (Di >Dj) ∀ij # yani ürün hacmi > alan hacmi olursa 0 olmalı
-W𝑖,𝐻𝑖,𝐷𝑖,𝑉𝑖,𝑄𝑖,𝑊𝑗,𝐻𝑗,𝐷𝑗,𝑈𝑗,P𝑖,𝑆𝑗,xij≥0 ∀i,∀j #non-negativity
+∑j (xij^^lower + xij^^upper) = Qi ∀i #Each product must be placed completely
+∑i Vi*xij^^lower ≤ Uj/2 ∀j 
+∑i Vi*xij^^upper ≤ Uj/2 ∀j #Volume constraint for each area (for lower and upper parts separately) (Her alandaki toplam ürün hacmi her alanın hacminden küçük olmalı)
+Vi*xij^^lower=0 and Vi*xij^^upper=0 if (Wi >Wj ) ∨ (Hi >Hj ) ∨ (Di >Dj) ∀i,j # yani ürün hacmi > alan hacmi olursa 0 olmalı
+xij^^upper ≤ Q𝑖 ×(1−xkj^^lower) If Gi>Gk and i not equal to k ∀i,j 
+W𝑖,𝐻𝑖,𝐷𝑖,𝑉𝑖,𝑄𝑖,𝑊𝑗,𝐻𝑗,𝐷𝑗,𝑈𝑗,P𝑖,𝑆𝑗≥0 ∀i,j #non-negativity
+xij^^lower,xij^^upper ∈ {0,1}  ∀i,j #binary constraints 
